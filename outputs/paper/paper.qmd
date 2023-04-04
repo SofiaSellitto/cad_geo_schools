@@ -1,118 +1,57 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
-author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
-date: "`r Sys.time()`"
-date-format: "D MMMM YYYY"
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
-format: pdf
-number-sections: true
+author: "Sofia Sellitto"
+date: "April 21, 2023"
+date-format: long
+format: 
+  pdf: 
+    documentclass: article 
+    geometry: margin = 1in 
+    abstract: "This paper follows an examination of the spatial distribution of educational facilities in Canada and whether a relationship exists between facility location and Province/municipality wealth. The research aims to identify any significant patterns and trends in the distribution of educational facilities, particularly in relation to province and municipality wealth. I have found that _________findings________. The findings of this study aim to contribute to a deeper understanding of educational access and inequality in Canada to inform future research and policies aimed at addressing these issues."
+
+toc: true 
+toc-depth: 4
+    
 bibliography: references.bib
 ---
 
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-library(tidyverse)
-library(palmerpenguins)
-```
-
-
 # Introduction
 
-You can and should cross-reference sections and sub-sections. For instance, @sec-data and @sec-first-point. 
+P1: Get a source on education facilities in Canada
 
+In America, unequal access to education is a widely recognized issue that appears to particularly plague impoverished districts and States. Multiple factors contribute to this problem, including the school's funding, whether it is a public or private institution, the student-to-teacher ratio, distance from the school, geographic location, familial income, and racial/ethnic background. This disparity in educational access is a deeply structural issue that spatially affects low-income states and districts.
 
+P2: More context and the gap my work fills
+
+Educational funding in America is primarily Local with the Federal government only contributing approximately 9% of their total budget (cite Atlantic). Because of this, high-poverty districts are far less able to contribute quality budgets for schooling, resulting in them spending 15.6% less per student than low-poverty districts (cite Atlantic). Lower-income families residing in impoverished districts are particularly affected by this inequality, as it has the potential to impact their children's future access to higher education and potentially, their socioeconomic status. (socio-economic status). The acknowledgement of unequal access to education in America is and has been widely understood in discourse for quite some time. However, a nation which appears to receive little attention in regard to this topic of study is Canada.
+
+P3: Introduce the dataset and the purpose of the paper and the research question
+
+In this paper, I aim to investigate the spatial distribution of educational facilities in Canada to address the two following research claims: (1) What is the distribution of educational facilities across Canada & (2) Do they differ spacially and numerical in accordance with the wealth of the Province & municipality wealth. Using an Open Source Data made available by Statistics Canada, I have conducted an exploration of this topic and found that \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_INSERT FINDINGS HERE\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_.
+
+P4: Provide a layout for the paper (what was done, what was found and why its important)
+
+This paper will first begin by \_\_\_\_\_\_\_\_TALK ABOUT DATA SECTION\_\_\_\_\_\_\_\_\_\_\_\_. I will then go onto present \_\_\_\_\_\_\_\_\_\_TALK ABOUT FIGURES AND TABLE\_\_\_\_\_\_. Next I discuss the impacts of my findings on \_\_\_\_\_\_\_\_\_\_\_\_TALK ABOUT DISCUSSION/ LITERATURE\_\_\_\_\_\_\_. Where I commence by discussion implication of my study on future research and push for policy changes.
 
 # Data {#sec-data}
 
-Our data is of penguins (@fig-bills).
-
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-Also bills and their average (@fig-billssssss). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work.)
-
-```{r}
-#| label: fig-billssssss
-#| fig-cap: More bills of penguins
-#| echo: false
-#| fig-width: 8
-#| fig-height: 4
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk way more about it. 
-
-
-
 # Model
-
-$$
-Pr(\theta | y) = \frac{Pr(y | \theta) Pr(\theta)}{Pr(y)}
-$$ {#eq-bayes}
-
-@eq-bayes seems useful, eh?
-
-Here's a dumb example of how to use some references: In paper we run our analysis in `R` [@citeR]. We also use the `tidyverse` which was written by @thereferencecanbewhatever If we were interested in baseball data then @citeLahman could be useful. 
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
 
 # Results
 
 # Discussion
 
-## First discussion point {#sec-first-point}
+## Limitations
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
+##  Next Steps
 
 \newpage
 
 \appendix
 
-# Appendix {-}
-
+# Appendix {.unnumbered}
 
 # Additional details
 
-
 \newpage
 
-
 # References
-
-
