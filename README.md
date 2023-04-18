@@ -1,16 +1,14 @@
-# Starter folder
 
 ## Overview
 
-This repo provides students with a foundation for their own projects associated with *Telling Stories with Data*. You do not need every aspect for every paper and you should delete aspects that you do not need.
+This repo features an analysis on the the geographical distributions of education facilities in Canada with the purpose of understanding how provincial and municipal wealth impact the number and access to public and private school education facilities. This repo contains the data used for analysis, R scripts and a final pdf report.  
 
-To use this folder, click the green "Code" button", then "Download ZIP". Move the downloaded folder to where you want to work on your own computer, and then modify it to suit.
+## Guide to this repo
 
-## File Structure
+-   The final pdf report and Quarto document used to generate the paper can be found in `outputs`
 
-The repo is structured as:
+-   The data source used can be found in `input`
 
--   `input/data` contains the data sources used in analysis including the raw data.
--   `outputs/data` contains the cleaned dataset that was constructed.
--   `outputs/paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
--   `scripts` contains the R scripts used to simulate, download and clean data.
+-   The R scripts used to simulate, download and clean the data can e found in `scripts` 
+
+
