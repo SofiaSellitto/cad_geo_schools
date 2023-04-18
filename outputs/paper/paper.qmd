@@ -7,12 +7,30 @@ format:
     documentclass: article 
     geometry: margin = 1in 
     abstract: "This paper follows an examination of the spatial distribution of educational facilities in Canada and whether a relationship exists between facility location and Province/municipality wealth. The research aims to identify any significant patterns and trends in the distribution of educational facilities, particularly in relation to province and municipality wealth. I have found that _________findings________. The findings of this study aim to contribute to a deeper understanding of educational access and inequality in Canada to inform future research and policies aimed at addressing these issues."
+toc: true
+fig_caption: yes
+nocite: '@*'
 
-toc: true 
-toc-depth: 4
-    
-bibliography: references.bib
 ---
+```{r setup}
+
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(knitr)
+library(ggmap)
+library(gridtext)
+library(grid)
+library(gridExtra)
+library(sp)
+library(rgdal)
+library(sf)
+
+
+```
+
 
 # Introduction
 
@@ -26,23 +44,251 @@ Educational funding in America is primarily Local with the Federal government on
 
 P3: Introduce the dataset and the purpose of the paper and the research question
 
-In this paper, I aim to investigate the spatial distribution of educational facilities in Canada to address the two following research claims: (1) What is the distribution of educational facilities across Canada & (2) Do they differ spacially and numerical in accordance with the wealth of the Province & municipality wealth. Using an Open Source Data made available by Statistics Canada, I have conducted an exploration of this topic and found that \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_INSERT FINDINGS HERE\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_.
+In this paper, I aim to investigate the spatial distribution of educational facilities in Canada and specifically Ontario to address the two following research claims: (1) What is the distribution of educational facilities across Canada & (2) Do they differ spacially and numerical in accordance with the wealth of the Province & municipality wealth. Using an Open Source Data made available by Statistics Canada, I have conducted an exploration of this topic and found that
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_INSERT FINDINGS HERE\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_.
 
 P4: Provide a layout for the paper (what was done, what was found and why its important)
 
-This paper will first begin by \_\_\_\_\_\_\_\_TALK ABOUT DATA SECTION\_\_\_\_\_\_\_\_\_\_\_\_. I will then go onto present \_\_\_\_\_\_\_\_\_\_TALK ABOUT FIGURES AND TABLE\_\_\_\_\_\_. Next I discuss the impacts of my findings on \_\_\_\_\_\_\_\_\_\_\_\_TALK ABOUT DISCUSSION/ LITERATURE\_\_\_\_\_\_\_. Where I commence by discussion implication of my study on future research and push for policy changes.
+This paper will first begin by describing the data used for this analysis, its methodologies and features. I will then present a logistical regression model to _____insert fidnings____. An analysis of the data will follow which includes data visualization in the form of tables, graphs and maps. My analysis will conclude with a discussion of my results and a review of Canadian wealth and education distributions.  
+
+
+\_\_\_\_\_\_\_\_TALK ABOUT DATA SECTION\_\_\_\_\_\_\_\_\_\_\_\_. I will then go onto present \_\_\_\_\_\_\_\_\_\_TALK ABOUT FIGURES AND TABLE\_\_\_\_\_\_. Next I discuss the impacts of my findings on \_\_\_\_\_\_\_\_\_\_\_\_TALK ABOUT DISCUSSION/ LITERATURE\_\_\_\_\_\_\_. Where I commence by discussion implication of my study on future research and push for policy changes.
 
 # Data {#sec-data}
 
+
+## 2.1 Source
+
+This paper will follow an analysis of the distribution of education facilities across a series of Provinces in Canada. The dataset used for this paper was sourced from Statistics Canada, which provides users access to a series of Open Data bases for their public use. The source of data used for this analysis is provided by The Open Database of Education Facilities (ODEF) which is a collection of open databases concerning the types and locations of education facilities across Canada (cite statcan).  The ODEF gathers data from open data portals and webpages that are managed by municipal and provincial governments to facilitate access to topics of public interest (cite statcan). 
+
+
+## 2.2 Methodology 
+
+The ODEF collects microdata on education facilities from open data portals, provincial/territorial websites, and federal departments. The individual datasets are sourced from their respective original sources and standardized into the ODEF (cite statcan). The data frame was collected between August 2019 and March 2021 (cite statcan). The target audience of this database is any educational institution that is considered a physical location where the primary purpose is to provide instruction to a group of students or participants. This thus includes all levels of education, with no exclusion for funding arrangement, subject area, denomination or student type (cite statcan). As a result, this database comprises facilities such as those for early childhood education, kindergarten, elementary, secondary, post-secondary institutions, and training centres.  (cite statcan).  The database mainly consists of geocoordinates obtained from its sources. The education facilities were located by searching their names, city, and province, and were included if the resulting school name closely matched the original name. (cite statcan).  
+
+
+## 2.3 Features 
+
+The obtained database comprises 18,982 observations with 28 variables, collected between 2019 and 2021. It encompasses Canadian education facilities spanning from Pre-K to Post-Secondary institutions.
+My examination involved removing variables that were of non-interest in my analysis and including only variables that I believed to be necessary to the research objective. Additionally, I regrouped values that referred to the same facility type but had different nomenclature. 
+Below I have grouped the 13 variables of interest used in my analysis with the aim to describe them further.
+
+**Facility Name** 
+- This includes the name of each facility included in the database. 
+
+**Facility Type** 
+- This variable refers to the type of institution. For this analysis, I have chosen to only include the following: Public Schools, Private Schools, Francophone Schools, Catholic Schools and First Nations Schools.
+
+**ISCED Levels**
+- This refers to the International Standard Classification of Education which denotes grade range to provide a standard definition of education level.
+- I have chosen to only include the ISCED levels that are in accordance with Grades K - 12 (ISCED020, ISCED1, ISCED 2, ISCED 2).  
+
+**Full Address**
+
+**City** 
+
+**Province** 
+- As a result of the provinces I wish to focus on for this paper and the need to remove missing variables, this paper will only analyze the following Provinces: Ontario, Quebec, British Columbia, Alberta, Nova Scotia and New Brunswick.  
+
+**Postal Code** 
+
+**Census Subdivision (CSD)** 
+- The CSD names are derived from geographic coordinates (latitude and longitude)  
+
+**Longitude** 
+
+**Latitude** 
+
+
+
+
 # Model
+
+
+
+
+
 
 # Results
 
+To enable the visualization of my data I utilized the statistical coding language R (cite R). The exploratory analysis began by observing the number of school types for each of the Canadian provinces of interest: Alberta, British Columbia, New Brunswick, Nova Scotia, Ontario and Quebec. The purpose of this is to examine the numerical distribution of school types in Canada and identify the province with the highest distribution of public to private schools. 
+
+```{r}
+#reading my cleaned data for analysis 
+
+cad_data <- read_csv(here::here("inputs/data/cad_school_remove.csv"))
+
+```
+
+```{r}
+#| label: table_1
+
+#Regrouping variables of interest to create a table 
+
+number_facility_type <- cad_data |> 
+  count(Prov_Terr, Facility_Type)
+
+#Using Knitr to create a table 
+
+knitr::kable(number_facility_type,
+             "simple",
+             caption = "The Number of School Types for Each Canadian Province",
+            col.names = c("Province", "School Type", "Number of School Type" )) 
+```
+
+
+@table_1 illustrates the numerical difference between each of the provinces of interest and their associated number of school types. It is apparent that Ontario maintains the largest number of schools total across all the Provinces of interest. This distribution appears accurate as Ontario has the largest population among all the provinces in Canada. Ontario also has the highest numerical values of Private schools, with 1206. Given that Ontario has both the largest population among all Canadian provinces and is the richest province with extreme wealth disparity, the observed distribution appears to be accurate.  Alberta maintains the second highest variation of public to private schools with Nova Scotia being the third. 
+
+
+```{r}
+#| label: fig_1
+
+
+#using ggplot to create a barchart
+
+cad_data |>
+  count(Prov_Terr, Facility_Type) |>
+  ggplot(aes(x = Prov_Terr, y = n, fill = Facility_Type))+
+  geom_col(position = "dodge")+
+  theme_minimal()+
+  labs(
+  title = "The Number of School Types for Each Canadian Province or Territory",
+  x = "Province",
+  y = "Number of Schools",
+  fill = "School Type") 
+  
+```
+@fig_1 is a visual distribution of Table 1 to better aid in the comprehension of the data. Here the ratio of private to public schools is far more digestible. It also becomes apparent that Ontario appears to be the only Province with Catholic school. This is due to the fact that Ontario is the only province that has a separate publicly funded Catholic school system. In other provinces and territories, these types of educational institutions would be classified as private schools. 
+
+
+```{r}
+#| label: map_1
+
+
+#creating dimensions of the map
+bbox <- c(left = -133.68, bottom = 41.80, right = -57.129, top = 62.41)
+canada_map <- get_stamenmap(bbox,
+                             zoom = 5,
+                             maptype = "terrain")
+#plotting the map
+ggmap(canada_map,
+      extent = "device",
+      maprange = FALSE) +
+  
+ geom_point(data = cad_data %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  
+  geom_point(data = cad_data %>% filter(Facility_Type == "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  scale_color_manual(values = c("green", "orange", "purple", "red", "pink")) +
+  labs(
+    title = "Spatial Distribution of Types of Schools Across Canada", 
+    color = "Facility Type") +
+  theme_minimal()
+
+pdf("map.pdf", width = 20, height = 20)
+print(ggplot2::last_plot())
+dev.off()
+```
+@map_1 showcases the spatial distribution of school types across the map of Canada. In turning your attention toward the red dots, which denote public schools,  It is visually evident from the map that public schools are concentrated in the highest volume in Ontario. Upon observing the distribution of school types across Ontario, and given its status as the richest province with the highest income inequality, I have chosen to further examine this distribution within Ontario.
+
+```{r}
+#| label: map_2
+
+
+#Filtering for only Ontario 
+ontario_schools <- cad_data %>%
+  filter(Prov_Terr == "ON")
+
+#Get the latitude and longitude data for Ontario schools
+ontario_locations <- ontario_schools |>
+  select(Longitude, Latitude, City, Facility_Type)
+ 
+
+#making dimensions of the map
+
+bbox <- c(left = -98, bottom = 41.80, right = -74.471, top = 52.92)
+ontario_map <- get_stamenmap(bbox,
+                             zoom = 7,
+                             maptype = "terrain")
+#plotting the map 
+ggmap(ontario_map,
+      extent = "nomral",
+      maprange = FALSE) +
+annotate("text", x = -85, y = 49.5, label = "Ontario", size = 3, fontface = "bold", color = "black") +
+  
+  geom_point(data = ontario_schools %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  
+  geom_point(data = ontario_schools %>% filter(Facility_Type == "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+scale_color_manual(values = c("green", "red", "pink")) +
+  labs(
+    title = "Spatial Distribution of Types of Schools Across Ontario", 
+    color = "Facility Type") +
+  theme_minimal()
+
+```
+@map_2 again is a spatial distribution of school types across the map of Ontario. Again using the same colours to denote the school types, it is apparent here that the highest volume of private schools appears to cluster in Northern Ontario among the Greater Toronto Area (GTA), Ottawa, London and Kitchener. Further, we see the scattering of private schools in the South East of Ontario, and then very few in the West of Ontario. While Southern Ontario is far more popular this relationship is notable as there is a growing Urban and Rural divide in Ontario. Furthermore, the distribution of private and public schools in Toronto is noteworthy because Toronto is not only the wealthiest city in Canada but also the most unequal with an increasing wealth gap between its rich and poor residents. To further address this distribution, I have graphed the distribution of school types across the Greater Toronto Area (gta).
+
+
+
+```{r}
+#| label: map_3
+
+
+# Define GTA cities
+gta_cities <- c("Toronto", "Mississauga", "Brampton", "Markham", "Vaughan", "Oakville", "Burlington", "Richmond Hill", "Newmarket", "Pickering", "Ajax", "Whitby", "Oshawa")
+
+# Filter for only Ontario schools
+ontario_schools <- cad_data |>
+  filter(Prov_Terr == "ON")
+
+# Get the latitude and longitude data for Ontario schools in the GTA
+ontario_gta_schools <- ontario_schools |>
+  filter(City %in% gta_cities) |>
+  select(Longitude, Latitude, City, Facility_Type)
+
+# Define map dimensions for the GTA
+gta_bbox <- c(left = -80.5, bottom = 43.25, right = -78.5, top = 44.5)
+
+# Get map data for the GTA
+gta_map <- get_stamenmap(bbox = gta_bbox,
+                          zoom = 8,
+                          maptype = "terrain")
+
+# Plot the map with GTA schools
+ggmap(gta_map,
+      extent = "normal",
+      maprange = FALSE) +
+  annotate("text", x = -79.7, y = 44., label = "Greater Toronto Area", size = 3, fontface = "bold", color = "black") +
+  geom_point(data = ontario_gta_schools %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  geom_point(data = ontario_gta_schools %>% filter(Facility_Type == "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  scale_color_manual(values = c("green", "red", "pink")) +
+  labs(title = "Spatial Distribution of Types of Schools in the Greater Toronto Area", color = "Facility Type") +
+  theme_minimal()
+
+
+```
+
+@map_3 highlights the spacial distribution of school types across the following cities in the GTA: Toronto, Mississauga, Brampton, Markham, Vaughn, Oakville, Burlington, Richmond Hill, Newmarket, Pickering, Ajax, Whitby and Oshawa. From this map, it is apparent that private schools are most heavily populated in the richest areas of Toronto, and as it moves area from Toronto, the number of public schools appears to dwindle. We see that public schools cluster most heavily around Toronto, Oakville and Richmond hill which are some of the wealthiest cities in Toronto. The cause of this distribution is likely a result of the differences in wealth within these cities. 
+
+
+
+
 # Discussion
 
-## Limitations
+## Findings
 
-##  Next Steps
+## Case Study of sorts 
+
+##Limitations and Bias 
+
+## Future Research 
+
+
+
+
+
+
+
+
 
 \newpage
 
