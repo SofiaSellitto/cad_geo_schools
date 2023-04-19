@@ -59,9 +59,9 @@ cad_school_remove$Latitude <- as.numeric(cad_school_remove$Latitude)
 cad_school_remove$Longitude <- as.numeric(cad_school_remove$Longitude)
 
 
-
+data <- cad_school_remove
 
 #### Save data ####
 
-write_csv(cad_school_remove, here::here("inputs/data/cad_school_remove.csv"))
+write_csv(data, here::here("inputs/data/data.csv"))
 

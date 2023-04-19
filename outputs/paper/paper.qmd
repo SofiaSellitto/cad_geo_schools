@@ -10,9 +10,12 @@ format:
 toc: true
 fig_caption: yes
 nocite: '@*'
-
+bibliography: references.bib
 ---
 ```{r setup}
+#| echo: false
+#| warning: false
+#| include: false
 
 library(readr)
 library(dplyr)
@@ -22,11 +25,11 @@ library(janitor)
 library(knitr)
 library(ggmap)
 library(gridtext)
-library(grid)
 library(gridExtra)
 library(sp)
 library(rgdal)
 library(sf)
+library(marginaleffects)
 
 
 ```
@@ -34,25 +37,16 @@ library(sf)
 
 # Introduction
 
-P1: Get a source on education facilities in Canada
-
 In America, unequal access to education is a widely recognized issue that appears to particularly plague impoverished districts and States. Multiple factors contribute to this problem, including the school's funding, whether it is a public or private institution, the student-to-teacher ratio, distance from the school, geographic location, familial income, and racial/ethnic background. This disparity in educational access is a deeply structural issue that spatially affects low-income states and districts.
-
-P2: More context and the gap my work fills
 
 Educational funding in America is primarily Local with the Federal government only contributing approximately 9% of their total budget (cite Atlantic). Because of this, high-poverty districts are far less able to contribute quality budgets for schooling, resulting in them spending 15.6% less per student than low-poverty districts (cite Atlantic). Lower-income families residing in impoverished districts are particularly affected by this inequality, as it has the potential to impact their children's future access to higher education and potentially, their socioeconomic status. (socio-economic status). The acknowledgement of unequal access to education in America is and has been widely understood in discourse for quite some time. However, a nation which appears to receive little attention in regard to this topic of study is Canada.
 
-P3: Introduce the dataset and the purpose of the paper and the research question
+In this paper, I aim to investigate the spatial distribution of educational facilities in Canada and specifically Ontario to address the two following research claims: (1) What is the distribution of educational facilities across Canada & (2) Do they differ spatially and numerical in accordance with Provincial & municipal wealth. This paper was conducted using the statistical programming language R [@R]. The analysis of my data was enabled using the following packages: readr [@readr], ggplot [@ggplot], tidyverse [@tidyverse], dplyr [@dplr], janitor [@janitor], knitr [@knitr], ggmap [@ggmap], marginaleffects [@marginaleffects], gridtext [@gridtext], gridextra[@gridextra].
 
-In this paper, I aim to investigate the spatial distribution of educational facilities in Canada and specifically Ontario to address the two following research claims: (1) What is the distribution of educational facilities across Canada & (2) Do they differ spacially and numerical in accordance with the wealth of the Province & municipality wealth. Using an Open Source Data made available by Statistics Canada, I have conducted an exploration of this topic and found that
-\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_INSERT FINDINGS HERE\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_.
-
-P4: Provide a layout for the paper (what was done, what was found and why its important)
-
-This paper will first begin by describing the data used for this analysis, its methodologies and features. I will then present a logistical regression model to _____insert fidnings____. An analysis of the data will follow which includes data visualization in the form of tables, graphs and maps. My analysis will conclude with a discussion of my results and a review of Canadian wealth and education distributions.  
+This paper commences with a discussion of the data used for analysis, it's methodologies and features. I then present a logistic regression model and an analysis of the data will follow which includes data visualization in the form of tables, graphs and maps. I conclude with a discussion of my results and a call for future research within the Canadian context. 
 
 
-\_\_\_\_\_\_\_\_TALK ABOUT DATA SECTION\_\_\_\_\_\_\_\_\_\_\_\_. I will then go onto present \_\_\_\_\_\_\_\_\_\_TALK ABOUT FIGURES AND TABLE\_\_\_\_\_\_. Next I discuss the impacts of my findings on \_\_\_\_\_\_\_\_\_\_\_\_TALK ABOUT DISCUSSION/ LITERATURE\_\_\_\_\_\_\_. Where I commence by discussion implication of my study on future research and push for policy changes.
+
 
 # Data {#sec-data}
 
@@ -74,13 +68,17 @@ My examination involved removing variables that were of non-interest in my analy
 Below I have grouped the 13 variables of interest used in my analysis with the aim to describe them further.
 
 **Facility Name** 
+
 - This includes the name of each facility included in the database. 
 
 **Facility Type** 
+
 - This variable refers to the type of institution. For this analysis, I have chosen to only include the following: Public Schools, Private Schools, Francophone Schools, Catholic Schools and First Nations Schools.
 
 **ISCED Levels**
+
 - This refers to the International Standard Classification of Education which denotes grade range to provide a standard definition of education level.
+
 - I have chosen to only include the ISCED levels that are in accordance with Grades K - 12 (ISCED020, ISCED1, ISCED 2, ISCED 2).  
 
 **Full Address**
@@ -88,11 +86,13 @@ Below I have grouped the 13 variables of interest used in my analysis with the a
 **City** 
 
 **Province** 
+
 - As a result of the provinces I wish to focus on for this paper and the need to remove missing variables, this paper will only analyze the following Provinces: Ontario, Quebec, British Columbia, Alberta, Nova Scotia and New Brunswick.  
 
 **Postal Code** 
 
 **Census Subdivision (CSD)** 
+
 - The CSD names are derived from geographic coordinates (latitude and longitude)  
 
 **Longitude** 
@@ -103,29 +103,100 @@ Below I have grouped the 13 variables of interest used in my analysis with the a
 
 
 # Model
-
-
-
-
-
-
-# Results
-
-To enable the visualization of my data I utilized the statistical coding language R (cite R). The exploratory analysis began by observing the number of school types for each of the Canadian provinces of interest: Alberta, British Columbia, New Brunswick, Nova Scotia, Ontario and Quebec. The purpose of this is to examine the numerical distribution of school types in Canada and identify the province with the highest distribution of public to private schools. 
-
 ```{r}
-#reading my cleaned data for analysis 
+#| echo: false
+#| warning: false
+#| include: false
 
-cad_data <- read_csv(here::here("inputs/data/cad_school_remove.csv"))
+log_data <- read_csv(here::here("inputs/data/data.csv"))
 
 ```
 
 ```{r}
+#| echo: false
+#| warning: false
+#| include: false
+
+#Reading in my model data 
+log_model <- select(cad_data, Prov_Terr, Facility_Type)
+
+# Recode Facility_Type to binary variable
+log_model$Facility_Type <- ifelse(log_model$Facility_Type == "Private", 1, 0)
+
+#Converting character variables to a factor 
+log_model$Facility_Type <- factor(log_model$Facility_Type)
+log_model$Prov_Terr <- factor(log_model$Prov_Terr)
+head(log_model)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| include: false
+
+logit_model <- glm(
+  Facility_Type ~ Prov_Terr, 
+  data = log_model, 
+  family = "binomial"
+)
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| include: false
+
+logit_model <- predictions(logit_model) |>
+  as_tibble()
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+
+
+logit_model |>
+  ggplot(aes(
+    x = Prov_Terr,
+    y = estimate, 
+    color = Facility_Type
+  )) +
+  geom_jitter(width = 0.01, height = 0.01, alpha = 0.3) +
+  labs( 
+    x = "Province",
+    y = "Estimated Probability of School Type",
+    color = "School Type"
+  ) + 
+  theme_classic() + 
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+
+```
+
+# Results
+
+To enable the visualization of my data I utilized the statistical coding language R [@R]. The exploratory analysis began by observing the number of school types for each of the Canadian provinces of interest: Alberta, British Columbia, New Brunswick, Nova Scotia, Ontario and Quebec. The purpose of this is to examine the numerical distribution of school types in Canada and identify the province with the highest distribution of public to private schools. 
+
+```{r}
+#| echo: false
+#| warning: false
+#| include: false
+
+#Reading my cleaned data for analysis 
+
+data_cad <- read_csv(here::here("inputs/data/data.csv"))
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
 #| label: table_1
 
 #Regrouping variables of interest to create a table 
 
-number_facility_type <- cad_data |> 
+number_facility_type <- data_cad |> 
   count(Prov_Terr, Facility_Type)
 
 #Using Knitr to create a table 
@@ -141,12 +212,14 @@ knitr::kable(number_facility_type,
 
 
 ```{r}
+#| echo: false
+#| warning: false
 #| label: fig_1
 
 
-#using ggplot to create a barchart
+#Using ggplot to create a barchart
 
-cad_data |>
+data_cad |>
   count(Prov_Terr, Facility_Type) |>
   ggplot(aes(x = Prov_Terr, y = n, fill = Facility_Type))+
   geom_col(position = "dodge")+
@@ -162,40 +235,41 @@ cad_data |>
 
 
 ```{r}
+#| echo: false
+#| warning: false
 #| label: map_1
 
 
-#creating dimensions of the map
+#Creating dimensions of the map
 bbox <- c(left = -133.68, bottom = 41.80, right = -57.129, top = 62.41)
 canada_map <- get_stamenmap(bbox,
                              zoom = 5,
                              maptype = "terrain")
-#plotting the map
+#Plotting the map
 ggmap(canada_map,
       extent = "device",
       maprange = FALSE) +
   
- geom_point(data = cad_data %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+ geom_point(data = data_cad %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.2) +
   
-  geom_point(data = cad_data %>% filter(Facility_Type == "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  geom_point(data = data_cad %>% filter(Facility_Type == "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
   scale_color_manual(values = c("green", "orange", "purple", "red", "pink")) +
   labs(
     title = "Spatial Distribution of Types of Schools Across Canada", 
     color = "Facility Type") +
   theme_minimal()
 
-pdf("map.pdf", width = 20, height = 20)
-print(ggplot2::last_plot())
-dev.off()
 ```
 @map_1 showcases the spatial distribution of school types across the map of Canada. In turning your attention toward the red dots, which denote public schools,  It is visually evident from the map that public schools are concentrated in the highest volume in Ontario. Upon observing the distribution of school types across Ontario, and given its status as the richest province with the highest income inequality, I have chosen to further examine this distribution within Ontario.
 
 ```{r}
+#| echo: false
+#| warning: false
 #| label: map_2
 
 
 #Filtering for only Ontario 
-ontario_schools <- cad_data %>%
+ontario_schools <- data_cad |>
   filter(Prov_Terr == "ON")
 
 #Get the latitude and longitude data for Ontario schools
@@ -203,19 +277,19 @@ ontario_locations <- ontario_schools |>
   select(Longitude, Latitude, City, Facility_Type)
  
 
-#making dimensions of the map
+#Making dimensions of the map
 
 bbox <- c(left = -98, bottom = 41.80, right = -74.471, top = 52.92)
 ontario_map <- get_stamenmap(bbox,
                              zoom = 7,
                              maptype = "terrain")
-#plotting the map 
+#Plotting the map 
 ggmap(ontario_map,
       extent = "nomral",
       maprange = FALSE) +
 annotate("text", x = -85, y = 49.5, label = "Ontario", size = 3, fontface = "bold", color = "black") +
   
-  geom_point(data = ontario_schools %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
+  geom_point(data = ontario_schools %>% filter(Facility_Type != "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.2) +
   
   geom_point(data = ontario_schools %>% filter(Facility_Type == "Private"), aes(x = Longitude, y = Latitude, color = Facility_Type), size = 1, alpha = 0.5) +
 scale_color_manual(values = c("green", "red", "pink")) +
@@ -230,30 +304,32 @@ scale_color_manual(values = c("green", "red", "pink")) +
 
 
 ```{r}
+#| echo: false
+#| warning: false
 #| label: map_3
 
 
-# Define GTA cities
+#Defining cities within the GTA
 gta_cities <- c("Toronto", "Mississauga", "Brampton", "Markham", "Vaughan", "Oakville", "Burlington", "Richmond Hill", "Newmarket", "Pickering", "Ajax", "Whitby", "Oshawa")
 
-# Filter for only Ontario schools
-ontario_schools <- cad_data |>
+#Filtering for Ontario values
+ontario_schools <- data_cad |>
   filter(Prov_Terr == "ON")
 
-# Get the latitude and longitude data for Ontario schools in the GTA
+#Getting the latitude and longitude data for Ontario schools in the GTA
 ontario_gta_schools <- ontario_schools |>
   filter(City %in% gta_cities) |>
   select(Longitude, Latitude, City, Facility_Type)
 
-# Define map dimensions for the GTA
+#Defining map dimensions
 gta_bbox <- c(left = -80.5, bottom = 43.25, right = -78.5, top = 44.5)
 
-# Get map data for the GTA
+#Getting map of GTA
 gta_map <- get_stamenmap(bbox = gta_bbox,
                           zoom = 8,
                           maptype = "terrain")
 
-# Plot the map with GTA schools
+#Plotting the map
 ggmap(gta_map,
       extent = "normal",
       maprange = FALSE) +
@@ -276,11 +352,44 @@ ggmap(gta_map,
 
 ## Findings
 
-## Case Study of sorts 
+## Canadian Educational Disparities: A case study 
+
+
+https://www.theglobeandmail.com/news/national/time-to-lead/a-tale-of-two-schools-the-correlation-between-income-and-education/article15463950/ (cite 1)
+
+https://www150.statcan.gc.ca/n1/pub/11f0019m/11f0019m2015367-eng.htm (cite 2)
+
+
+
+https://www-tandfonline-com.myaccess.library.utoronto.ca/doi/full/10.1080/02680939.2017.1346203 (cite 3) 
+
+To better support the findings of this paper, I now turn my efforts toward a review of research on the educational disparities within Canada in relation to their geographical wealth. 
+I have chosen to first focus my efforts on Ontario, as this was the main focus of my analysis. Toronto, Canada's largest city exhibits a growing divide between low and high-income individuals and thus exhibits a high wealth disparity. During an investigation into the high school education offered in two different neighbourhoods in Toronto The Globe and Mail argues that the difference between these schools, and the student's access to education is largely due to the socioeconomic backgrounds of the students who attend these schools (cite 1). One high school, Collegiate Institute is located in one of Toronto's wealthiest neighbourhoods, Forest Hill and the other,  Central Technical School, is located in Merish Village, a far less affluent area.  Students who attend education facilities in Forest Hill have higher academic achievement and see a greater amount of students pursuing post-secondary education and endeavours, Central Tech however does not showcase the same sentiments (cite 1). Students who reside in higher-income areas, such as forest hill have greater access to better educational resources in opposition to students in low-income families and areas who face far more barriers in regard to their access to quality education (cite 1). The Globe and Mail further discuss how these inequalities are perpetuated by the Canadian education system where schools in lower-income neighbourhoods receive less funding and resources than those of wealthier areas (cite 1).  
+
+To enhance my findings on geographical wealth and access to private and public schools I will now discuss a paper published by Statistic Canada titled Difference in Academic Performance Between Public and Private School Students by Geographic Region. Using the National Housing Survey to compare the academic performances of elementary to high school-aged students who attend public and private schools across Canada, their findings found that students attending private schools had higher academic performances than those in public schools (cite 2). Their findings were especially prominent in Atlantic provinces and Quebec (cite 2). The authors suggest that students who are able to attend private schools tend to come from high-income families and because of such, these types of private institutions are far more prevalent in high-income areas and neighbourhoods (cite 2). 
+
+A 2017 paper, titled The Geography of School Choice in a City with Growing Inequality: The Case of Vancouver sought to examine the socio-spatial impact of school choice on students' secondary school enrollment patterns (cite 3). Their investigation found that students who opt into over-subscribed schools (define this later) come from affluent areas and neighbourhoods with above-average levels of capital in Vancover (cite 3). Their findings found increasing levels of segregation among student mobility and the possibility that parents choose schools based on their socioeconomic characteristics within their affluent locations (cite 3). These finding indicate that schools in affluent neighbourhoods with dominant racial and ethnic groups are perceived as better than schools in less affluent neighborhoods (cite 3). → reword this
+
+
 
 ##Limitations and Bias 
+These findings are in impart limited by the ODEF database from Statistics Canada, structural education policies, my manipulation and cleaning of variables, and biases imposed from my analysis. 
+
+To begin, the ODEF database is potentially limited in its accuracy and completeness. Such that before my manipulation, the database failed to include any Private school facilities for the Provinces of British Columbia and Quebec. This is something I know to be untrue and has thus impacted the capabilities of my analysis of this Province and the potential misrepresentation of their educational systems and facilities. Further, as a result of numerous missing values, ample data had to be removed, resulting in a failure to include smaller Canadian Provinces and Territories. The database simultaneously failed to include virtual and homeschooled education facilities, which erases a part of the population. Further, with the data collection period occurring between 2019-2021, the database in not representative of education facilities over time. Further, it is possible that the database is not entirely representative of the shift in educational facilities, policies and virtual schools which occurred following the COVID-19 pandemic. 
+
+Additionally, the removal of variables and regrouping of values during the data cleaning process has inevitably led to the loss and possible misinterpretation of data and findings. Additionally, my understanding of the original variable values for educational facility types could have been misinformed. This is a result of absent definitions included in the database and may have thus led to potential biases in my analysis. 
+
+Other limitations include the methodology and tools used for analysis and potential implicit biases which ultimately impact the way in which the data is explored, presented and discussed. 
+
 
 ## Future Research 
+This analysis has worked to provide insight into the distribution of educational facilities across Canadian Provinces. While the current analysis delivers valuable insights, I believe it is important to acknowledge the avenues of future research which could help strengthen this area of research within the Canadian context. 
+
+Firstly, I believe that future research should investigate the level of school funding in relation to geographical municipalities and their respective level of wealth. In doing so, I believe such research would provide more insight into the relationship between geographical wealth and school funding and act to enrich my current analysis. 
+
+Further research could also act to investigate student outcomes and academic achievements like graduation rates, and grades, again in relation to geographical location. This could provide insight into the effectiveness of different educational facilities and how they differ across municipalities of varying wealth. 
+
+Finally, future research can investigate and explore the relationship between access to certain educational facilities and demographic factors such as income, ethnicity, and race.
 
 
 
