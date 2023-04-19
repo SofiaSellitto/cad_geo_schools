@@ -103,76 +103,8 @@ Below I have grouped the 13 variables of interest used in my analysis with the a
 
 
 # Model
-```{r}
-#| echo: false
-#| warning: false
-#| include: false
-
-log_data <- read_csv(here::here("inputs/data/data.csv"))
-
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| include: false
-
-#Reading in my model data 
-log_model <- select(cad_data, Prov_Terr, Facility_Type)
-
-# Recode Facility_Type to binary variable
-log_model$Facility_Type <- ifelse(log_model$Facility_Type == "Private", 1, 0)
-
-#Converting character variables to a factor 
-log_model$Facility_Type <- factor(log_model$Facility_Type)
-log_model$Prov_Terr <- factor(log_model$Prov_Terr)
-head(log_model)
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| include: false
-
-logit_model <- glm(
-  Facility_Type ~ Prov_Terr, 
-  data = log_model, 
-  family = "binomial"
-)
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| include: false
-
-logit_model <- predictions(logit_model) |>
-  as_tibble()
-
-```
-
-```{r}
-#| echo: false
-#| warning: false
 
 
-logit_model |>
-  ggplot(aes(
-    x = Prov_Terr,
-    y = estimate, 
-    color = Facility_Type
-  )) +
-  geom_jitter(width = 0.01, height = 0.01, alpha = 0.3) +
-  labs( 
-    x = "Province",
-    y = "Estimated Probability of School Type",
-    color = "School Type"
-  ) + 
-  theme_classic() + 
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom")
-
-```
 
 # Results
 
