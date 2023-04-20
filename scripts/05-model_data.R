@@ -1,7 +1,6 @@
 #### Preamble ####
 # Purpose: Downloads and saves the data from https://www.statcan.gc.ca/en/lode/databases/odef
 # Author: Sofia Sellitto 
-# Date: 29 March 2023
 # Contact: sofia.sellitto@mail.utoronto.ca
 # License: MIT
 # Pre-requisites:None
