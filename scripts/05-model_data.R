@@ -4,66 +4,58 @@
 # Date: 29 March 2023
 # Contact: sofia.sellitto@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: 
-# Any other information needed? None.
+# Pre-requisites:None
 
-
+#Loading packages
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(marginaleffects)
 
 
-
 log_data <- read_csv(here::here("inputs/data/data.csv"))
 
 
+###In this script I test a potential binomial model###
+##However, based on the nature of my data and it being character variables, the model was not of use and thus not presented in my final analysis pdf## 
 
-log_model <- filter(cad_data, Prov_Terr, Facility_Type)
- 
 
+#Reading in my model data 
+log_model <- select(cad_data, Prov_Terr, Facility_Type)
+
+#Recode Facility_Type to binary variable
+log_model$Facility_Type <- ifelse(log_model$Facility_Type == "Private", 1, 0)
 
 #Converting character variables to a factor 
 log_model$Facility_Type <- factor(log_model$Facility_Type)
 log_model$Prov_Terr <- factor(log_model$Prov_Terr)
 head(log_model)
 
-# Filtering the data to include only public and private schools
+
+logit_model <- glm(
+  Facility_Type ~ Prov_Terr, 
+  data = log_model, 
+  family = "binomial"
+)
 
 
-#estimating
-logit_model <- 
-  glm(
-    Prov_Terr ~ Facility_Type, 
-    data = log_model, 
-    family = "binomial")
-
-summary(logit_model)
-
-
-logit_model <- 
-  predictions(logit_model) |> 
+logit_model <- predictions(logit_model) |>
   as_tibble()
 
-logit_model
 
-#graphing the probability that our model implies 
+#Graphing model 
 logit_model |>
   ggplot(aes(
-    x = Facility_Type,
+    x = Prov_Terr,
     y = estimate, 
-    color = Prov_Terr
+    color = Facility_Type
   )) +
   geom_jitter(width = 0.01, height = 0.01, alpha = 0.3) +
   labs( 
-    x = "School Type",
-    y = "Estimated Probability of School Type on Province",
-    color = "Province"
+    x = "Province",
+    y = "Estimated Probability of School Type",
+    color = "School Type"
   ) + 
   theme_classic() + 
   scale_color_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
-
-
-write_csv(logit_model, here::here("inputs/data/logit_model"))
-

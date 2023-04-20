@@ -1,30 +1,28 @@
 #### Preamble ####
 # Purpose: Downloads and saves the data from https://www.statcan.gc.ca/en/lode/databases/odef
 # Author: Sofia Sellitto 
-# Date: 29 March 2023
 # Contact: sofia.sellitto@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: 
-# Any other information needed? None.
+# Pre-requisites: Have downloaded csv data from: https://www.statcan.gc.ca/en/lode/databases/odef 
 
 
 
-#### Workspace setup ####
-library(tidyverse)
+##loading packages
+library(readstata13)
+library(readr)
 
 
 
+##Data was downloaded as a zip file, written in as CSV from my files and renamed
 
-#### Download ####
-## Data was downloaded as a zip file, writing in CSV from my files and renaming the dataframe ##
-# read in dataset 
 
+#reading in the file
 cad_school <- read_csv("C:/Users/gsell/Downloads/my_data/my_data/ODEF_v2_1.csv")
 
 
 
 
-#### Save data ####
+#writing to csv
 write_csv(cad_school,here::here("inputs/data/cad_school.csv"))
 
          

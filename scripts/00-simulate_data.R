@@ -1,13 +1,11 @@
 #### Preamble ####
 # Purpose: Downloads and saves the data from https://www.statcan.gc.ca/en/lode/databases/odef
 # Author: Sofia Sellitto 
-# Date: 29 March 2023
 # Contact: sofia.sellitto@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: 
-# Any other information needed? None.
+# Pre-requisites: None
 
-#### Workspace setup ####
+#Loading packages
 library(tidyverse)
 library(readr)
 
@@ -16,7 +14,7 @@ set.seed(123)
 
 #### Simulate data ####
 
-#using the variables present within the df, and imputing example values
+#Using the variables present within the df, and imputing example values
 
 school_name <- sample(c('St. Michaels Catholic Secondary School', 
                         'Robert F. Hall Catholic Secondary School', 'St. John
@@ -42,12 +40,12 @@ cad_city <- sample(c('Toronto', 'Montreal', 'Vancouver', 'Calgary','Edmonton',
 prov_terr <- sample(c('ON', 'QC', 'NS', 'NB', 'MB', 'BC', 'PE', 'SK', 'AB',
                       'NL', 'NT', 'YT', 'NV'), size = 100, replace = TRUE)
 
-latitude <- runif(10, 42, 70)
+latitude <- runif(100, 42, 70)
 
-longitude <- runif(10, -141, -52)
+longitude <- runif(100, -141, -52)
 
 
-#creating the data frame and calling on the variables
+#Creating the data frame and calling on the variables
 
 data_sim <- data_frame( 
   school_name,
@@ -60,5 +58,7 @@ data_sim <- data_frame(
   longitude,
   )
 
-# write simulation on csv for testing 
+#Write simulation onto csv for testing 
 write_csv(data_sim, here::here("inputs/data/data_sim.csv"))
+
+

@@ -1,15 +1,12 @@
 #### Preamble ####
-#### Preamble ####
 # Purpose: Downloads and saves the data from https://www.statcan.gc.ca/en/lode/databases/odef
 # Author: Sofia Sellitto 
-# Date: 29 March 2023
 # Contact: sofia.sellitto@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: 
-# Any other information needed? None.
+# Pre-requisites: run 01-download_data.R
 
 
-#### Workspace setup ####
+#Loading packages
 library(tidyverse)
 library(readr)
 library(dplyr)
@@ -47,7 +44,6 @@ cad_school_remove <- cad_school_remove |>
                                 "Private", Facility_Type))
 
 #Removing missing variables that were input as '..' by replacing them as NA 
-
 cad_school_remove <- replace(cad_school_remove, cad_school_remove == "..",
                              NA)
 
@@ -61,7 +57,7 @@ cad_school_remove$Longitude <- as.numeric(cad_school_remove$Longitude)
 
 data <- cad_school_remove
 
-#### Save data ####
 
+#writing to CSV
 write_csv(data, here::here("inputs/data/data.csv"))
 
